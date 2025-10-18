@@ -61,20 +61,20 @@ func (s *TeacherService) GetAll() ([]models.Teacher, error) {
 }
 
 func (s *TeacherService) GetById(id uint) (*models.Teacher, error) {
-	var teacher *models.Teacher
-	err := db.DB.First(&teacher, id).Error
+	var teacher models.Teacher
+	err := db.DB.First(teacher, id).Error
 	if err != nil {
 		return nil, err
 	}
-	return teacher, err
+	return &teacher, err
 }
 
 func (s *TeacherService) Create(teacher *models.Teacher) error {
-	return db.DB.Create(&teacher).Error
+	return db.DB.Create(teacher).Error
 }
 
 func (s *TeacherService) Update(teacher *models.Teacher) error {
-	return db.DB.Save(&teacher).Error
+	return db.DB.Save(teacher).Error
 }
 
 func (s *TeacherService) Delete(id uint) error {
