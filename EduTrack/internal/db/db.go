@@ -24,12 +24,12 @@ func Init() {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
+	password := os.Getenv("DB_PASSWORD")
 	name := os.Getenv("DB_NAME")
 
 	// нужна строка подключения которую будут читать потом (dsn)
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s pass=%s name=%s", host, port, user, pass, name)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", host, port, user, password, name)
 
 	// подключаемся к базе через горм
 
@@ -37,6 +37,8 @@ func Init() {
 	if err != nil {
 		log.Fatal("Не удалось подключиться к базе данных: ", err)
 	}
+
+	
 
 	fmt.Println("Успешное подключение к базе данных")
 }
