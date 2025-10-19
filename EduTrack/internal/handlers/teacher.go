@@ -56,17 +56,22 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+    id, _ := strconv.Atoi(idStr)
+
 	var teacher models.Teacher
 	if err := json.NewDecoder(r.Body).Decode(&teacher); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	teacher.ID = uint(id)
+
 	if err := teacherService.Update(&teacher); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(teacher)
 }
@@ -75,10 +80,10 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, _ := strconv.Atoi(idStr)
 
-	if err := teacherService.Delete(uint(id)); err != nil { 
-		http.Error(w, err.Error(), http.StatusInternalServerError) 
-		return 
-	} 
-		
+	if err := teacherService.Delete(uint(id)); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusNoContent)
 }

@@ -17,7 +17,7 @@ func Routes() *chi.Mux {
 		r.Get("/", handlers.ListTeacher)
 		r.Get("/{id}", handlers.GetTeacher)
 		r.Post("/", handlers.CreateTeacher)
-		r.Put("/", handlers.UpdateTeacher)
+		r.Put("/{id}", handlers.UpdateTeacher)
 		r.Delete("/{id}", handlers.DeleteTeacher)
 	})
 
