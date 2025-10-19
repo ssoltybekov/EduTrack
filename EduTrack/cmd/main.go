@@ -7,8 +7,10 @@ package main
 import (
 	"edutrack/internal/db"
 	"edutrack/internal/models"
+	"edutrack/internal/routes"
 	"fmt"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -20,5 +22,9 @@ func main() {
 		log.Fatal("Ошибка миграции: ", err)
 	}
 
+	r := routes.Routes()
+
 	fmt.Println("Все таблицы успешно созданы")
+	fmt.Println("Server running on http://localhost:8080")
+	http.ListenAndServe(":8080", r)
 }
