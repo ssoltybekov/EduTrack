@@ -25,7 +25,10 @@ func ListSubmissions(w http.ResponseWriter, r *http.Request) {
 
 func GetSubmission(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, _ := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	submission, err := submissionService.GetById(uint(id))
 	if err != nil {
@@ -71,7 +74,10 @@ func UpdateSubmission(w http.ResponseWriter, r *http.Request) {
 
 func DeleteSubmission(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, _ := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	if err := submissionService.Delete(uint(id)); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

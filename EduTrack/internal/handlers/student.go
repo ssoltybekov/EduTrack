@@ -25,7 +25,10 @@ func ListStudents(w http.ResponseWriter, r *http.Request) {
 
 func GetStudent(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, _ := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	student, err := studentService.GetById(uint(id))
 	if err != nil {
@@ -71,7 +74,10 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 
 func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, _ := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	if err := studentService.Delete(uint(id)); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

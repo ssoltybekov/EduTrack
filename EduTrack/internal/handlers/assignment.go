@@ -81,7 +81,10 @@ func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
 
 func DeleteAssignment(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, _ := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	if err := assignmentService.Delete(uint(id)); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

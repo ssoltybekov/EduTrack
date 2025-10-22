@@ -27,7 +27,10 @@ func ListTeacher(w http.ResponseWriter, r *http.Request) {
 
 func GetTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, _ := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	teacher, err := teacherService.GetById(uint(id))
 	if err != nil {
@@ -57,7 +60,10 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 
 func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-    id, _ := strconv.Atoi(idStr)
+    id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	var teacher models.Teacher
 	if err := json.NewDecoder(r.Body).Decode(&teacher); err != nil {
@@ -78,7 +84,10 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 
 func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, _ := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	if err := teacherService.Delete(uint(id)); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
