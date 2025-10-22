@@ -29,5 +29,13 @@ func Routes() *chi.Mux {
 		r.Delete("/{id}", handlers.DeleteStudent)
 	})
 
+	r.Route("/assignments", func(r chi.Router) {
+		r.Get("/", handlers.ListAssignments)
+		r.Get("/{id}", handlers.GetAssignment)
+		r.Post("/", handlers.CreateAssignment)
+		r.Put("/", handlers.UpdateAssignment)
+		r.Delete("/{id}", handlers.DeleteAssignment)
+	})
+
 	return r
 }
