@@ -30,6 +30,7 @@ func GetTeacher(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
 	}
 
 	teacher, err := teacherService.GetById(uint(id))
@@ -63,6 +64,7 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
     id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
 	}
 
 	var teacher models.Teacher
@@ -87,6 +89,7 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
 	}
 
 	if err := teacherService.Delete(uint(id)); err != nil {

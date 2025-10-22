@@ -28,6 +28,7 @@ func GetSubmission(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
 	}
 
 	submission, err := submissionService.GetById(uint(id))
@@ -77,6 +78,7 @@ func DeleteSubmission(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
 	}
 
 	if err := submissionService.Delete(uint(id)); err != nil {

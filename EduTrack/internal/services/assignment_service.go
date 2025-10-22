@@ -34,8 +34,19 @@ func (s *AssignmentService) Create(assignment *models.Assignment) error {
 	return db.DB.Create(assignment).Error
 }
 
-func (s *AssignmentService) Update(assignment *models.Assignment) error {
-	return db.DB.Save(assignment).Error
+func (s *AssignmentService) Update(id uint ,updated *models.Assignment) (*models.Assignment, error) {
+	var existing models.Assignment
+	err := db.DB.First(existing, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	existing.Title = updated.Title
+	existing.Description = updated.Description
+	existing.Deadline = updated.Deadline
+	existing.TeacherID = updated.TeacherID
+
+	return &existing, nil
 }
 
 func (s *AssignmentService) Delete(id uint) error {

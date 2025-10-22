@@ -28,6 +28,7 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
 	}
 
 	student, err := studentService.GetById(uint(id))
@@ -77,6 +78,7 @@ func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
 	}
 
 	if err := studentService.Delete(uint(id)); err != nil {
