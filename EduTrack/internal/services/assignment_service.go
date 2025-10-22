@@ -13,7 +13,7 @@ func NewAssignmentService() *AssignmentService {
 
 func (s *AssignmentService) GetAll() ([]models.Assignment, error) {
 	var assignments []models.Assignment
-	err := db.DB.Find(assignments).Error
+	err := db.DB.Preload("Teacher").Preload("Submissions").Find(assignments).Error
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func (s *AssignmentService) GetAll() ([]models.Assignment, error) {
 
 func (s *AssignmentService) GetById(id uint) (*models.Assignment, error) {
 	var assignment models.Assignment
-	err := db.DB.First(assignment, id).Error
+	err := db.DB.Preload("Teacher").Preload("Submissions").First(assignment, id).Error
 	if err != nil {
 		return nil, err
 	}

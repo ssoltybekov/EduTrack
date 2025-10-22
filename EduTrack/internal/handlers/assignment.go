@@ -25,7 +25,10 @@ func ListAssignments(w http.ResponseWriter, r *http.Request) {
 
 func GetAssignment(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, _ := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	}
 
 	assignment, err := assignmentService.GetById(uint(id))
 	if err != nil {
@@ -54,19 +57,26 @@ func CreateAssignment(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
-	var assignment models.Assignment
-	if err := json.NewDecoder(r.Body).Decode(&assignment); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	var updated models.Assignment
+
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
 	}
 
-	if err := assignmentService.Update(&assignment); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// if err := json.NewDecoder(r.Body).Decode(&assignment); err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(assignment)
+	// if err := assignmentService.Update(&assignment); err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// w.WriteHeader(http.StatusOK)
+	// json.NewEncoder(w).Encode(assignment)
 }
 
 func DeleteAssignment(w http.ResponseWriter, r *http.Request) {

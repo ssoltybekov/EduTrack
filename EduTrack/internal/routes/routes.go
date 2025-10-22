@@ -37,5 +37,13 @@ func Routes() *chi.Mux {
 		r.Delete("/{id}", handlers.DeleteAssignment)
 	})
 
+	r.Route("/submissions", func(r chi.Router) {
+		r.Get("/", handlers.ListSubmissions)
+		r.Get("/{id}", handlers.GetSubmission)
+		r.Post("/", handlers.CreateSubmission)
+		r.Put("/{id}", handlers.UpdateSubmission)
+		r.Delete("/{id}", handlers.DeleteSubmission)
+	})
+
 	return r
 }
