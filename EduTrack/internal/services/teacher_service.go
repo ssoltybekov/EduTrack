@@ -78,5 +78,5 @@ func (s *TeacherService) Update(teacher *models.Teacher) error {
 }
 
 func (s *TeacherService) Delete(id uint) error {
-	return db.DB.Delete(&models.Teacher{}, id).Error
+	return db.DB.Unscoped().Delete(&models.Teacher{}, id).Error
 }

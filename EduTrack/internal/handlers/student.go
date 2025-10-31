@@ -58,19 +58,29 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateStudent(w http.ResponseWriter, r *http.Request) {
-	var student models.Student
-	if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
-	if err := studentService.Update(&student); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	var updated models.Student
+
+	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	student, err := studentService.Update(uint(id), &updated)
+	if err != nil {
+		http.Error(w, "There is no existing assignment", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(student)
+
 }
 
 func DeleteStudent(w http.ResponseWriter, r *http.Request) {

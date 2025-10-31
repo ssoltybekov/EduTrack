@@ -38,7 +38,10 @@ func Init() {
 		log.Fatal("Не удалось подключиться к базе данных: ", err)
 	}
 
-	
+	sqlDB, _ := DB.DB()
+	if err := sqlDB.Ping(); err != nil {
+		log.Fatal("Не удалось пинговать базу: ", err)
+	}
 
 	fmt.Println("Успешное подключение к базе данных")
 }

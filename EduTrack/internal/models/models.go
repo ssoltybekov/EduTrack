@@ -19,7 +19,7 @@ type Teacher struct {
 	Name        string
 	Email       string `gorm:"uniqueIndex"`
 	Subject     string
-	Assignments []Assignment `gorm:"foreignKey:TeacherID"`
+	Assignments []Assignment `gorm:"foreignKey:TeacherID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type Assignment struct {
@@ -28,8 +28,8 @@ type Assignment struct {
 	Description string
 	Deadline    time.Time
 	TeacherID   uint
-	Teacher     Teacher      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"` 
-	Submissions []Submission `gorm:"foreignKey:AssignmentID"`                        
+	Teacher     Teacher      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Submissions []Submission `gorm:"foreignKey:AssignmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`                        
 }
 
 type Analytics struct {
