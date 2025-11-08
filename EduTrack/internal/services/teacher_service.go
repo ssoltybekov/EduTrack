@@ -62,7 +62,7 @@ func (s *TeacherService) GetAll() ([]models.Teacher, error) {
 
 func (s *TeacherService) GetById(id uint) (*models.Teacher, error) {
 	var teacher models.Teacher
-	err := db.DB.First(teacher, id).Error
+	err := db.DB.First(&teacher, id).Error
 	if err != nil {
 		return nil, err
 	}
