@@ -50,5 +50,5 @@ func (s *AssignmentService) Update(id uint ,updated *models.Assignment) (*models
 }
 
 func (s *AssignmentService) Delete(id uint) error {
-	return db.DB.Delete(&models.Assignment{}, id).Error
+	return db.DB.Unscoped().Delete(&models.Assignment{}, id).Error
 }

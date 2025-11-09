@@ -11,7 +11,7 @@ type Student struct {
 	Name        string
 	Email       string `gorm:"uniqueIndex"`
 	Group       string
-	Submissions []Submission `gorm:"foreignKey:StudentID"`
+	Submissions []Submission `gorm:"foreignKey:StudentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type Teacher struct {
@@ -44,9 +44,9 @@ type Analytics struct {
 type Submission struct {
 	gorm.Model
 	StudentID    uint
-	Student      Student `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Student      Student `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	AssignmentID uint
-	Assignment   Assignment `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Assignment   Assignment `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Grade        float64
 	Feedback     string
 }
