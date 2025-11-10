@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"edutrack/internal/dto"
 	"edutrack/internal/models"
 	"edutrack/internal/services"
 	"encoding/json"
@@ -42,13 +43,14 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateStudent(w http.ResponseWriter, r *http.Request) {
-	var student models.Student
-	if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	var input dto.StudentInputDTO
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
 
-	if err := studentService.Create(&student); err != nil {
+	student, err := studentService.Create(&input)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
