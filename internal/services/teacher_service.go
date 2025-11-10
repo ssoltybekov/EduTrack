@@ -2,6 +2,7 @@ package services
 
 import (
 	"edutrack/internal/db"
+	"edutrack/internal/dto"
 	"edutrack/internal/models"
 )
 
@@ -29,8 +30,24 @@ func (s *TeacherService) GetById(id uint) (*models.Teacher, error) {
 	return &teacher, err
 }
 
-func (s *TeacherService) Create(teacher *models.Teacher) error {
-	return db.DB.Create(teacher).Error
+func (s *TeacherService) Create(input *dto.TeacherInputDTO) (*dto.TeacherOutputDTO, error) {
+	teacher := models.Teacher{
+		Name: input.Name,
+		Email: input.Email,
+		Subject: input.Subject,
+	}
+	
+	if err := db.DB.Create(&teacher).Error; err != nil {
+		return nil, err
+	}
+
+	output := &dto.TeacherOutputDTO {
+		ID: teacher.ID,
+		Name: teacher.Name,
+		Email: teacher.Email,
+		Subject: teacher.Subject,
+	}
+	return output, nil
 }
 
 func (s *TeacherService) Update(teacher *models.Teacher) error {

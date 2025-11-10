@@ -39,13 +39,13 @@ func (s *StudentService) Create(input *dto.StudentInputDTO) (*dto.StudentOutputD
 	if err := db.DB.Create(&student).Error; err != nil {
 		return nil, err
 	}
-	output := dto.StudentOutputDTO {
+	output := &dto.StudentOutputDTO {
 		ID: student.ID,
 		Name: student.Name,
 		Email: student.Email,
 		Group: student.Group,
 	}
-	return &output, nil
+	return output, nil
 }
 
 func (s *StudentService) Update(id uint, updated *models.Student) (*models.Student, error) {
