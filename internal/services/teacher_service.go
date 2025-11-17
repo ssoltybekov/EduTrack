@@ -18,16 +18,22 @@ func (s *TeacherService) GetAll() ([]models.Teacher, error) {
 	if err != nil {
 		return nil, err
 	}
+	
 	return teachers, err
 }
 
-func (s *TeacherService) GetById(id uint) (*models.Teacher, error) {
+func (s *TeacherService) GetById(id uint) (*dto.TeacherOutputDTO, error) {
 	var teacher models.Teacher
 	err := db.DB.First(&teacher, id).Error
 	if err != nil {
 		return nil, err
 	}
-	return &teacher, err
+	return &dto.TeacherOutputDTO{
+		ID: teacher.ID,
+		Name: teacher.Name,
+		Email: teacher.Email,
+		Subject: teacher.Subject,
+	}, err
 }
 
 func (s *TeacherService) Create(input *dto.TeacherInputDTO) (*dto.TeacherOutputDTO, error) {
@@ -50,8 +56,26 @@ func (s *TeacherService) Create(input *dto.TeacherInputDTO) (*dto.TeacherOutputD
 	return output, nil
 }
 
-func (s *TeacherService) Update(teacher *models.Teacher) error {
-	return db.DB.Save(teacher).Error
+func (s *TeacherService) Update(id uint, updated *dto.TeacherInputDTO) (*dto.TeacherOutputDTO, error) {
+	var existing models.Teacher
+	if err := db.DB.First(&existing).Error; err != nil {
+		return nil, err
+	}
+
+	existing.Name = updated.Name
+	existing.Email = updated.Email
+	existing.Subject = updated.Subject
+
+	if err := db.DB.Save(&existing).Error; err != nil {
+		return nil, err
+	}
+
+	return &dto.TeacherOutputDTO{
+		ID: existing.ID,
+		Name: existing.Name,
+		Email: existing.Email,
+		Subject: existing.Subject,
+	}, nil
 }
 
 func (s *TeacherService) Delete(id uint) error {

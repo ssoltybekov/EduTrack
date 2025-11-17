@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"edutrack/internal/dto"
-	"edutrack/internal/models"
 	"edutrack/internal/services"
 	"encoding/json"
 	"net/http"
@@ -67,7 +66,7 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updated models.Student
+	var updated dto.StudentInputDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)

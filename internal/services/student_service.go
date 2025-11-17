@@ -21,34 +21,39 @@ func (s *StudentService) GetAll() ([]models.Student, error) {
 	return students, err
 }
 
-func (s *StudentService) GetById(id uint) (*models.Student, error) {
+func (s *StudentService) GetById(id uint) (*dto.StudentOutputDTO, error) {
 	var student models.Student
 	err := db.DB.First(&student, id).Error
 	if err != nil {
 		return nil, err
 	}
-	return &student, err
+	return &dto.StudentOutputDTO{
+		ID:    student.ID,
+		Name:  student.Name,
+		Email: student.Email,
+		Group: student.Group,
+	}, err
 }
 
-func (s *StudentService) Create(input *dto.StudentInputDTO) (*dto.StudentOutputDTO ,error) {
-	student := models.Student {
-		Name: input.Name,
-		Email: input.Email,  
-    	Group: input.Group,
+func (s *StudentService) Create(input *dto.StudentInputDTO) (*dto.StudentOutputDTO, error) {
+	student := models.Student{
+		Name:  input.Name,
+		Email: input.Email,
+		Group: input.Group,
 	}
 	if err := db.DB.Create(&student).Error; err != nil {
 		return nil, err
 	}
-	output := &dto.StudentOutputDTO {
-		ID: student.ID,
-		Name: student.Name,
+	output := &dto.StudentOutputDTO{
+		ID:    student.ID,
+		Name:  student.Name,
 		Email: student.Email,
 		Group: student.Group,
 	}
 	return output, nil
 }
 
-func (s *StudentService) Update(id uint, updated *models.Student) (*models.Student, error) {
+func (s *StudentService) Update(id uint, updated *dto.StudentInputDTO) (*dto.StudentOutputDTO, error) {
 	var existing models.Student
 	if err := db.DB.First(&existing, id).Error; err != nil {
 		return nil, err
@@ -62,7 +67,12 @@ func (s *StudentService) Update(id uint, updated *models.Student) (*models.Stude
 		return nil, err
 	}
 
-	return &existing, nil
+	return &dto.StudentOutputDTO{
+		ID:    existing.ID,
+		Name:  existing.Name,
+		Email: existing.Email,
+		Group: existing.Group,
+	}, nil
 }
 
 func (s *StudentService) Delete(id uint) error {

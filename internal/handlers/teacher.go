@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"edutrack/internal/dto"
-	"edutrack/internal/models"
 	"edutrack/internal/services"
 	"encoding/json"
 	"net/http"
@@ -63,21 +62,20 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 
 func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-    id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
-	var teacher models.Teacher
-	if err := json.NewDecoder(r.Body).Decode(&teacher); err != nil {
+	var updated dto.TeacherInputDTO
+	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	teacher.ID = uint(id)
-
-	if err := teacherService.Update(&teacher); err != nil {
+	teacher, err := teacherService.Update(uint(id), &updated)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
