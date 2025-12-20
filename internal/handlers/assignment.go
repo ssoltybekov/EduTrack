@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"edutrack/internal/models"
+	"edutrack/internal/dto"
 	"edutrack/internal/services"
 	"encoding/json"
 	"net/http"
@@ -42,19 +42,21 @@ func GetAssignment(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateAssignment(w http.ResponseWriter, r *http.Request) {
-	var assignment models.Assignment
-	if err := json.NewDecoder(r.Body).Decode(&assignment); err != nil {
+	var input dto.AssignmentInputDTO
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := assignmentService.Create(&assignment); err != nil {
+	out, err := assignmentService.Create(&input)
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(assignment)
+	json.NewEncoder(w).Encode(out)
 }
 
 func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +67,7 @@ func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updated models.Assignment
+	var updated dto.AssignmentInputDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -80,9 +82,6 @@ func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(assignment)
-
-
-
 
 	// if err := json.NewDecoder(r.Body).Decode(&assignment); err != nil {
 	// 	http.Error(w, err.Error(), http.StatusBadRequest)
