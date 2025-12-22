@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"edutrack/internal/models"
+	"edutrack/internal/dto"
 	"edutrack/internal/services"
 	"encoding/json"
 	"net/http"
@@ -42,34 +42,45 @@ func GetSubmission(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateSubmission(w http.ResponseWriter, r *http.Request) {
-	var submission models.Submission
-	if err := json.NewDecoder(r.Body).Decode(&submission); err != nil {
+	var input dto.SubmissionInputDTO
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := submissionService.Create(&submission); err != nil {
+	submission, err := submissionService.Create(&input)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(submission)
 }
 
 func UpdateSubmission(w http.ResponseWriter, r *http.Request) {
-	var submission models.Submission
-	if err := json.NewDecoder(r.Body).Decode(&submission); err != nil {
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	var input dto.SubmissionInputDTO
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := submissionService.Update(&submission); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	submission, err := submissionService.Update(uint(id), &input)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(submission)
 }
 

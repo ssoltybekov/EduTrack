@@ -2,7 +2,9 @@ package services
 
 import (
 	"edutrack/internal/db"
+	"edutrack/internal/dto"
 	"edutrack/internal/models"
+	"errors"
 )
 
 type SubmissionService struct{}
@@ -30,12 +32,50 @@ func (s *SubmissionService) GetById(id uint) (*models.Submission, error) {
 	return &submission, err
 }
 
-func (s *SubmissionService) Create(submission *models.Submission) error {
-	return db.DB.Create(submission).Error
+func (s *SubmissionService) Create(input *dto.SubmissionInputDTO) (*dto.SubmissionOutputDTO, error) {
+	submission := models.Submission{
+		StudentID:    input.StudentID,
+		AssignmentID: input.AssignmentID,
+		Grade:        input.Grade,
+		Feedback:     input.Feedback,
+	}
+
+	if err := db.DB.Create(&submission).Error; err != nil {
+		return nil, err
+	}
+
+	return &dto.SubmissionOutputDTO{
+		ID:           submission.ID,
+		StudentID:    submission.StudentID,
+		AssignmentID: submission.AssignmentID,
+		Grade:        submission.Grade,
+		Feedback:     submission.Feedback,
+	}, nil
 }
 
-func (s *SubmissionService) Update(submission *models.Submission) error {
-	return db.DB.Save(submission).Error
+func (s *SubmissionService) Update(id uint, input *dto.SubmissionInputDTO) (*dto.SubmissionOutputDTO, error) {
+	var submission models.Submission
+
+	if err := db.DB.First(&submission, id).Error; err != nil {
+		return nil, errors.New("submission not found")
+	}
+
+	submission.StudentID = input.StudentID
+	submission.AssignmentID = input.AssignmentID
+	submission.Grade = input.Grade
+	submission.Feedback = input.Feedback
+
+	if err := db.DB.Save(&submission).Error; err != nil {
+		return nil, err
+	}
+
+	return &dto.SubmissionOutputDTO{
+		ID:           submission.ID,
+		StudentID:    submission.StudentID,
+		AssignmentID: submission.AssignmentID,
+		Grade:        submission.Grade,
+		Feedback:     submission.Feedback,
+	}, nil
 }
 
 func (s *SubmissionService) Delete(id uint) error {
