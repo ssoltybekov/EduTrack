@@ -6,6 +6,7 @@ package main
 
 import (
 	"edutrack/internal/db"
+	"edutrack/internal/handlers"
 	"edutrack/internal/models"
 	"edutrack/internal/routes"
 	"fmt"
@@ -21,6 +22,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Ошибка миграции: ", err)
 	}
+
+	handlers.Init()
 
 	r := routes.Routes()
 
