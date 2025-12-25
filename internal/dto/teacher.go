@@ -3,7 +3,7 @@ package dto
 type TeacherInputDTO struct {
     Name    string `json:"name" validate:"required"`
     Email   string `json:"email" validate:"required,email"`
-    Subject string `json:"subject"`
+    Subject string `json:"subject" validate:"omitempty,max=100"`
 }
 
 type TeacherOutputDTO struct {

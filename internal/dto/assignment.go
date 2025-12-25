@@ -2,7 +2,7 @@ package dto
 
 type AssignmentInputDTO struct {
 	Title       string `json:"title" validate:"required"`
-	Description string `json:"description"`
+	Description string `json:"description" validate:"omitempty,max=1000"`
 	Deadline    string `json:"deadline" validate:"required"`
 	TeacherID   uint   `json:"teacher_id" validate:"required"`
 }

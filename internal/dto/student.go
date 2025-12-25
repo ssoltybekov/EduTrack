@@ -1,9 +1,9 @@
 package dto
 
 type StudentInputDTO struct {
-	Name  string `json:"name" validate:"required"`
+	Name  string `json:"name" validate:"required,min=2,max=100"`
 	Email string `json:"email" validate:"required,email"`
-	Group string `json:"group"`
+	Group string `json:"group" validate:"omitempty,max=50"`
 }
 
 type StudentOutputDTO struct {

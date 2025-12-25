@@ -6,8 +6,8 @@ package main
 
 import (
 	"edutrack/internal/db"
-	"edutrack/internal/handlers"
 	"edutrack/internal/models"
+	"edutrack/internal/pkg/validator"
 	"edutrack/internal/routes"
 	"fmt"
 	"log"
@@ -23,7 +23,7 @@ func main() {
 		log.Fatal("Ошибка миграции: ", err)
 	}
 
-	handlers.Init()
+	validator.Init()
 
 	r := routes.Routes()
 

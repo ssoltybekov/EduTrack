@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"edutrack/internal/dto"
+	"edutrack/internal/pkg/response"
 	"edutrack/internal/services"
 	"encoding/json"
 	"net/http"
@@ -15,7 +16,7 @@ var assignmentService = services.NewAssignmentService()
 func ListAssignments(w http.ResponseWriter, r *http.Request) {
 	assignments, err := assignmentService.GetAll()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Internal(w)
 		return
 	}
 
@@ -27,7 +28,7 @@ func GetAssignment(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
 
@@ -44,14 +45,14 @@ func GetAssignment(w http.ResponseWriter, r *http.Request) {
 func CreateAssignment(w http.ResponseWriter, r *http.Request) {
 	var input dto.AssignmentInputDTO
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.BadRequest(w, "Invalid JSON")
 		return
 	}
 
 	out, err := assignmentService.Create(&input)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Internal(w)
 		return
 	}
 
