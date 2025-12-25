@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"edutrack/internal/dto"
+	"edutrack/internal/pkg/response"
+	"edutrack/internal/pkg/validator"
 	"edutrack/internal/services"
 	"encoding/json"
 	"net/http"
@@ -49,6 +51,11 @@ func CreateSubmission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validator.Validator.Struct(input); err != nil {
+		response.ValidationError(w, err)
+		return
+	}
+
 	submission, err := submissionService.Create(&input)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -71,6 +78,11 @@ func UpdateSubmission(w http.ResponseWriter, r *http.Request) {
 	var input dto.SubmissionInputDTO
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := validator.Validator.Struct(input); err != nil {
+		response.ValidationError(w, err)
 		return
 	}
 
