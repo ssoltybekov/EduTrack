@@ -1,0 +1,15 @@
+Submission
+{
+  "student_id": 42,
+  "assignment_id": 20,
+  "grade": 3.5,
+  "feedback": "Well Done!"
+}
+
+assignment
+{
+  "title": "Linear Regression Homework",
+  "description": "Solve tasks 1–5 from the worksheet",
+  "teacher_id": 3,
+  "deadline": "2025-01-10"
+}

@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
+	"net/http"
+	"strconv"
+
 	"edutrack/internal/dto"
 	"edutrack/internal/pkg/response"
 	"edutrack/internal/pkg/validator"
 	"edutrack/internal/services"
-	"encoding/json"
-	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi"
 )
@@ -17,97 +18,81 @@ var submissionService = services.NewSubmissionService()
 func ListSubmissions(w http.ResponseWriter, r *http.Request) {
 	submissions, err := submissionService.GetAll()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Internal(w)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(submissions)
+	response.JSON(w, http.StatusOK, submissions)
 }
 
 func GetSubmission(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
-
 	submission, err := submissionService.GetById(uint(id))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		response.FromError(w, err)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(submission)
+	response.JSON(w, http.StatusOK, submission)
 }
 
 func CreateSubmission(w http.ResponseWriter, r *http.Request) {
 	var input dto.SubmissionInputDTO
-
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.BadRequest(w, "Invalid JSON")
 		return
 	}
-
 	if err := validator.Validator.Struct(input); err != nil {
 		response.ValidationError(w, err)
 		return
 	}
 
-	submission, err := submissionService.Create(&input)
+	out, err := submissionService.Create(&input)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.FromError(w, err)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(submission)
+	response.JSON(w, http.StatusCreated, out)
 }
 
 func UpdateSubmission(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "invalid id", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
-
-	var input dto.SubmissionInputDTO
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	var updated dto.SubmissionInputDTO
+	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
+		response.BadRequest(w, "Invalid JSON")
 		return
 	}
-
-	if err := validator.Validator.Struct(input); err != nil {
+	if err := validator.Validator.Struct(updated); err != nil {
 		response.ValidationError(w, err)
 		return
 	}
 
-	submission, err := submissionService.Update(uint(id), &input)
+	submission, err := submissionService.Update(uint(id), &updated)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		response.FromError(w, err)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(submission)
+	response.JSON(w, http.StatusOK, submission)
 }
 
 func DeleteSubmission(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
-
 	if err := submissionService.Delete(uint(id)); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.FromError(w, err)
 		return
 	}
-
 	w.WriteHeader(http.StatusNoContent)
 }

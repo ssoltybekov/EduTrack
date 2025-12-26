@@ -21,8 +21,7 @@ func ListAssignments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(assignments)
+	response.JSON(w, http.StatusOK, assignments)
 }
 
 func GetAssignment(w http.ResponseWriter, r *http.Request) {
@@ -35,12 +34,11 @@ func GetAssignment(w http.ResponseWriter, r *http.Request) {
 
 	assignment, err := assignmentService.GetById(uint(id))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		response.FromError(w, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(assignment)
+	response.JSON(w, http.StatusOK, assignment)
 }
 
 func CreateAssignment(w http.ResponseWriter, r *http.Request) {
@@ -58,26 +56,25 @@ func CreateAssignment(w http.ResponseWriter, r *http.Request) {
 	out, err := assignmentService.Create(&input)
 
 	if err != nil {
-		response.Internal(w)
+		response.FromError(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(out)
+	response.JSON(w, http.StatusOK, out)
 }
 
 func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
 
 	var updated dto.AssignmentInputDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid JSON")
 		return
 	}
 
@@ -88,12 +85,11 @@ func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
 
 	assignment, err := assignmentService.Update(uint(id), &updated)
 	if err != nil {
-		http.Error(w, "There is no existing assignment", http.StatusBadRequest)
+		response.FromError(w, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(assignment)
+	response.JSON(w, http.StatusOK, assignment)
 
 	// if err := json.NewDecoder(r.Body).Decode(&assignment); err != nil {
 	// 	http.Error(w, err.Error(), http.StatusBadRequest)
@@ -113,12 +109,12 @@ func DeleteAssignment(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
 
 	if err := assignmentService.Delete(uint(id)); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.FromError(w, err)
 		return
 	}
 

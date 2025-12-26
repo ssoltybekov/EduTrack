@@ -1,86 +1,75 @@
 package handlers
 
 import (
-	"edutrack/internal/dto"
-	"edutrack/internal/pkg/response"
-	"edutrack/internal/pkg/validator"
-	"edutrack/internal/services"
 	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"edutrack/internal/dto"
+	"edutrack/internal/pkg/response"
+	"edutrack/internal/pkg/validator"
+	"edutrack/internal/services"
+
 	"github.com/go-chi/chi"
 )
-
-// crud, принимаем запрос здесь, вызываем сервис и возвращаем json
 
 var teacherService = services.NewTeacherService()
 
 func ListTeacher(w http.ResponseWriter, r *http.Request) {
 	teachers, err := teacherService.GetAll()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Internal(w)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(teachers)
+	response.JSON(w, http.StatusOK, teachers)
 }
 
 func GetTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
-
 	teacher, err := teacherService.GetById(uint(id))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		response.FromError(w, err)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(teacher)
+	response.JSON(w, http.StatusOK, teacher)
 }
 
 func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 	var input dto.TeacherInputDTO
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.BadRequest(w, "Invalid JSON")
 		return
 	}
-
 	if err := validator.Validator.Struct(input); err != nil {
 		response.ValidationError(w, err)
 		return
 	}
 
-	teacher, err := teacherService.Create(&input)
+	out, err := teacherService.Create(&input)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.FromError(w, err)
 		return
 	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(teacher)
+	response.JSON(w, http.StatusCreated, out)
 }
 
 func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
-
 	var updated dto.TeacherInputDTO
 	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.BadRequest(w, "Invalid JSON")
 		return
 	}
-
 	if err := validator.Validator.Struct(updated); err != nil {
 		response.ValidationError(w, err)
 		return
@@ -88,26 +77,22 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 
 	teacher, err := teacherService.Update(uint(id), &updated)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.FromError(w, err)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(teacher)
+	response.JSON(w, http.StatusOK, teacher)
 }
 
 func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		response.BadRequest(w, "Invalid ID")
 		return
 	}
-
 	if err := teacherService.Delete(uint(id)); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.FromError(w, err)
 		return
 	}
-
 	w.WriteHeader(http.StatusNoContent)
 }

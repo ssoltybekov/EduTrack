@@ -1,6 +1,7 @@
 package response
 
 import (
+	"edutrack/internal/pkg/errors"
 	"encoding/json"
 	"net/http"
 
@@ -65,4 +66,18 @@ func Internal(w http.ResponseWriter) {
 	res.Error.Code = "INTERNAL_ERROR"
 	res.Error.Message = "internal server error"
 	JSON(w, http.StatusInternalServerError, res)
+}
+
+func FromError(w http.ResponseWriter, err error) {
+	if err == nil {
+		return 
+	}
+	switch err {
+	case errors.ErrNotFound:
+		NotFound(w, err.Error())
+	case errors.ErrForeignKey, errors.ErrInvalidInput:
+		BadRequest(w, err.Error())
+	default:
+		Internal(w)
+	}
 }

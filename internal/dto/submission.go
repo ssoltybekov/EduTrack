@@ -14,3 +14,5 @@ type SubmissionOutputDTO struct {
 	Grade        float64 `json:"grade"`
 	Feedback     string  `json:"feedback"`
 }
+
+
