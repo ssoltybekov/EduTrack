@@ -70,13 +70,15 @@ func Internal(w http.ResponseWriter) {
 
 func FromError(w http.ResponseWriter, err error) {
 	if err == nil {
-		return 
+		return
 	}
 	switch err {
 	case errors.ErrNotFound:
 		NotFound(w, err.Error())
 	case errors.ErrForeignKey, errors.ErrInvalidInput:
 		BadRequest(w, err.Error())
+	case errors.ErrForbidden:
+		Forbidden(w, err.Error())
 	default:
 		Internal(w)
 	}

@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"edutrack/internal/db"
 	"edutrack/internal/dto"
 	"edutrack/internal/models"
@@ -15,111 +17,110 @@ func NewSubmissionService() *SubmissionService {
 	return &SubmissionService{}
 }
 
-func (s *SubmissionService) GetAll() ([]models.Submission, error) {
-	var submissions []models.Submission
-	err := db.DB.Preload("Student").Preload("Assignment").Find(&submissions).Error
-	return submissions, err
-}
-
-func (s *SubmissionService) GetById(id uint) (*dto.SubmissionOutputDTO, error) {
-	var submission models.Submission
-	if err := db.DB.Preload("Student").Preload("Assignment").First(&submission, id).Error; err != nil {
+func (s *SubmissionService) Create(input *dto.SubmissionInputDTO, assignmentID uint, studentID uint) (*dto.SubmissionOutputDTO, error) {
+	var assignment models.Assignment
+	if err := db.DB.First(&assignment, assignmentID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, errors.ErrNotFound
 		}
 		return nil, err
 	}
-	return &dto.SubmissionOutputDTO{
-		ID:           submission.ID,
-		StudentID:    submission.StudentID,
-		AssignmentID: submission.AssignmentID,
-		Grade:        submission.Grade,
-		Feedback:     submission.Feedback,
-	}, nil
-}
 
-func (s *SubmissionService) Create(input *dto.SubmissionInputDTO) (*dto.SubmissionOutputDTO, error) {
-	if err := db.DB.First(&models.Student{}, input.StudentID).Error; err != nil {
+	var user models.User
+	if err := db.DB.First(&user, studentID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, errors.ErrNotFound
 		}
 		return nil, err
 	}
+	if user.Role != models.RoleStudent {
+		return nil, errors.ErrInvalidInput 
+	}
+
 	
-	if err := db.DB.First(&models.Assignment{}, input.AssignmentID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, errors.ErrNotFound
-		}
+	if time.Now().After(assignment.Deadline) {
+		return nil, errors.ErrInvalidInput
+	}
+
+	
+	var count int64
+	if err := db.DB.Model(&models.Submission{}).
+		Where("assignment_id = ? AND user_id = ?", assignmentID, studentID).
+		Count(&count).Error; err != nil {
 		return nil, err
+	}
+	if count > 0 {
+		return nil, errors.ErrInvalidInput 
 	}
 
 	submission := models.Submission{
-		StudentID:    input.StudentID,
-		AssignmentID: input.AssignmentID,
-		Grade:        input.Grade,
-		Feedback:     input.Feedback,
+		Content:      input.Content,
+		UserID:       studentID,
+		AssignmentID: assignmentID,
+		SubmittedAt:  time.Now(),
 	}
 
 	if err := db.DB.Create(&submission).Error; err != nil {
 		return nil, err
 	}
 
-	return &dto.SubmissionOutputDTO{
-		ID:           submission.ID,
-		StudentID:    submission.StudentID,
-		AssignmentID: submission.AssignmentID,
-		Grade:        submission.Grade,
-		Feedback:     submission.Feedback,
-	}, nil
+	return s.mapToOutput(&submission), nil
 }
 
-func (s *SubmissionService) Update(id uint, input *dto.SubmissionInputDTO) (*dto.SubmissionOutputDTO, error) {
+func (s *SubmissionService) GetAllByAssignment(assignmentID uint) ([]dto.SubmissionOutputDTO, error) {
+	var submissions []models.Submission
+	if err := db.DB.Preload("User").Where("assignment_id = ?", assignmentID).Find(&submissions).Error; err != nil {
+		return nil, err
+	}
+	var out []dto.SubmissionOutputDTO
+	for _, sub := range submissions {
+		out = append(out, *s.mapToOutput(&sub))
+	}
+	return out, nil
+}
+
+func (s *SubmissionService) GetById(id uint) (*dto.SubmissionOutputDTO, error) {
 	var submission models.Submission
-	if err := db.DB.First(&submission, id).Error; err != nil {
+	if err := db.DB.Preload("User").First(&submission, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.ErrNotFound
+		}
+		return nil, err
+	}
+	return s.mapToOutput(&submission), nil
+}
+
+func (s *SubmissionService) Grade(id uint, grade float64, feedback string, teacherID uint) (*dto.SubmissionOutputDTO, error) {
+	var submission models.Submission
+	if err := db.DB.Preload("Assignment.Lesson").First(&submission, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, errors.ErrNotFound
 		}
 		return nil, err
 	}
 
-	if err := db.DB.First(&models.Student{}, input.StudentID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, errors.ErrNotFound
-		}
-		return nil, err
-	}
-	if err := db.DB.First(&models.Assignment{}, input.AssignmentID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, errors.ErrNotFound
-		}
-		return nil, err
+	if submission.Assignment.Lesson.UserID != teacherID {
+		return nil, errors.ErrForbidden
 	}
 
-	submission.StudentID = input.StudentID
-	submission.AssignmentID = input.AssignmentID
-	submission.Grade = input.Grade
-	submission.Feedback = input.Feedback
+	submission.Grade = &grade
+	submission.Feedback = feedback
 
 	if err := db.DB.Save(&submission).Error; err != nil {
 		return nil, err
 	}
 
-	return &dto.SubmissionOutputDTO{
-		ID:           submission.ID,
-		StudentID:    submission.StudentID,
-		AssignmentID: submission.AssignmentID,
-		Grade:        submission.Grade,
-		Feedback:     submission.Feedback,
-	}, nil
+	return s.mapToOutput(&submission), nil
 }
 
-func (s *SubmissionService) Delete(id uint) error {
-	var submission models.Submission
-	if err := db.DB.First(&submission, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return errors.ErrNotFound
-		}
-		return err
+func (s *SubmissionService) mapToOutput(sub *models.Submission) *dto.SubmissionOutputDTO {
+	return &dto.SubmissionOutputDTO{
+		ID:           sub.ID,
+		Content:      sub.Content,
+		Grade:        sub.Grade,
+		Feedback:     sub.Feedback,
+		SubmittedAt:  sub.SubmittedAt.Format("2006-01-02 15:04"),
+		StudentID:    sub.UserID,
+		AssignmentID: sub.AssignmentID,
 	}
-	return db.DB.Delete(&submission).Error
 }
