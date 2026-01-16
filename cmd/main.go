@@ -7,14 +7,20 @@ package main
 import (
 	"edutrack/internal/db"
 	"edutrack/internal/models"
-	"edutrack/internal/pkg/validator" 
+	"edutrack/internal/pkg/validator"
 	"edutrack/internal/routes"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: .env file not found — using system env variables")
+	}
+
 	db.Init()
 
 	err := db.DB.AutoMigrate(&models.User{}, &models.Lesson{}, &models.Assignment{}, &models.Submission{}, &models.Analytics{})
@@ -22,7 +28,7 @@ func main() {
 		log.Fatal("Ошибка миграции: ", err)
 	}
 
-	validator.Init() 
+	validator.Init()
 
 	r := routes.Routes()
 
